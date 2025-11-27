@@ -15,6 +15,7 @@ package Budget;
 
 // Swing imports
 import javax.swing.*;
+import javax.swing.text.DefaultEditorKit;
 import java.awt.event.*;
 import java.awt.*;
 
@@ -36,7 +37,14 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     private JTextField RentExpenseField; //Rent Expense Field
     private JTextField OtherExpenseField; //Other Expense Field
     private JTextField Surplus_Deficit_Field; //Surplus/Deficit Field
-    
+
+    private JComboBox<String> wage_Frequency;
+    private JComboBox<String> loan_Frequency;
+    private JComboBox<String> otherFinance_Frequency;
+    private JComboBox<String> food_Frequency;
+    private JComboBox<String> rent_Frequency;
+    private JComboBox<String> otherExpenses_Frequency;
+
     String[] dropdown_options = new String[]{"week", "month", "year"};
 
 
@@ -67,7 +75,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         addComponent(wagesField, 1, 1);
 
         //Set up a frequency for the wages
-        JComboBox<String> wage_Frequency = addDropdown(dropdown_options);
+        wage_Frequency = addDropdown(dropdown_options);
         addComponent(wage_Frequency, 1 , 2);
 
 
@@ -81,7 +89,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         addComponent(loansField, 2, 1);
 
         //Set up a frequency for the loan
-        JComboBox<String> loan_Frequency = addDropdown(dropdown_options);
+        loan_Frequency = addDropdown(dropdown_options);
         addComponent(loan_Frequency, 2 , 2);
 
 
@@ -95,7 +103,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         addComponent(otherField, 3, 1);
 
         //Set up a frequency for the other finance options
-        JComboBox<String> otherFinance_Frequency = addDropdown(dropdown_options);
+        otherFinance_Frequency = addDropdown(dropdown_options);
         addComponent(otherFinance_Frequency, 3 , 2);
 
         // Row 4 - Food Expense label followed by food expense textfield
@@ -108,7 +116,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         addComponent(FoodExpenseField, 4, 1);
 
         //Set up a frequency for the food expenses
-        JComboBox<String> food_Frequency = addDropdown(dropdown_options);
+        food_Frequency = addDropdown(dropdown_options);
         addComponent(food_Frequency, 4 , 2);
 
         // Row 5 - Rent Expense label followed by rent expense textfield
@@ -121,7 +129,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         addComponent(RentExpenseField, 5, 1);
 
         //Set up a frequency for the rent expenses
-        JComboBox<String> rent_Frequency = addDropdown(dropdown_options);
+        rent_Frequency = addDropdown(dropdown_options);
         addComponent(rent_Frequency, 5 , 2);
 
         // Row 6 - Other Expense label followed by Other expense textfield
@@ -134,7 +142,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         addComponent(OtherExpenseField, 6, 1);
 
         //Set up a frequency for the other expenses
-        JComboBox<String> otherExpenses_Frequency = addDropdown(dropdown_options);
+        otherExpenses_Frequency = addDropdown(dropdown_options);
         addComponent(otherExpenses_Frequency, 6 , 2);
 
         // Row 8 - Total Income label followed by total income field
@@ -165,13 +173,95 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         exitButton = new JButton("Exit");
         addComponent(exitButton, 10, 0);
 
-        // set up  listeners (in a spearate method)
+        // set up  listeners (in a separate method)
         initListeners();
     }
 
     // set up listeners
     // initially just for buttons, can add listeners for text fields
     private void initListeners() {
+        //For when focus is lost and the fields need updating
+        wagesField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                //Leaving this field empty as the only uses of this will be when focus is lost
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome(); calculateSurplus_Deficit();
+            }
+        });
+        loansField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                //Leaving this field empty as the only uses of this will be when focus is lost
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome(); calculateSurplus_Deficit();
+            }
+        });
+        otherField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                //Leaving this field empty as the only uses of this will be when focus is lost
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome(); calculateSurplus_Deficit();
+            }
+        });
+        FoodExpenseField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                //Leaving this field empty as the only uses of this will be when focus is lost
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome(); calculateSurplus_Deficit();
+            }
+        });
+        RentExpenseField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                //Leaving this field empty as the only uses of this will be when focus is lost
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome(); calculateSurplus_Deficit();
+            }
+        });
+        OtherExpenseField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                //Leaving this field empty as the only uses of this will be when focus is lost
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome(); calculateSurplus_Deficit();
+            }
+        });
+
+        //For when a number is entered or changed
+        allkeys(wagesField);
+        allkeys(loansField);
+        allkeys(otherField);
+        allkeys(FoodExpenseField);
+        allkeys(RentExpenseField);
+        allkeys(OtherExpenseField);
+
+
+
+
+
+
+
 
         // exitButton - exit program when pressed
         exitButton.addActionListener(new java.awt.event.ActionListener() {
@@ -195,6 +285,8 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
     }
 
+
+
     // add a component at specified row and column in UI.  (0,0) is top-left corner
     private void addComponent(Component component, int gridrow, int gridcol) {
         layoutConstraints.fill = GridBagConstraints.HORIZONTAL;   // always use horixontsl filll
@@ -209,17 +301,48 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         return new JComboBox<>(items);
     }
 
+    private double getMultiplier(double value, JComboBox<String> combo_box) {
+        String frequency;
+        frequency = (String) combo_box.getSelectedItem();
+
+        return switch (frequency) {
+            case "week" -> value * 52;
+            case "month" -> value * 12;
+            case "year" -> value;
+            default -> value;
+        };
+
+    }
+    //Method for all the key listeners
+    public void allkeys(JTextField field){
+        field.addKeyListener(new java.awt.event.KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                calculateTotalIncome(); calculateSurplus_Deficit();
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                calculateTotalIncome(); calculateSurplus_Deficit();
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                calculateTotalIncome(); calculateSurplus_Deficit();
+            }
+
+
+        });
+    }
+
     // update totalIncomeField (eg, when Calculate is pressed)
     // use double to hold numbers, so user can type fractional amounts such as 134.50
     public double calculateTotalIncome() {
 
         // get values from income text fields.  value is NaN if an error occurs
-        double wages = getTextFieldValue(wagesField);
-        double loans = getTextFieldValue(loansField);
-        double otherFinance = getTextFieldValue(otherField);
-
-
-
+        double wages = getMultiplier(getTextFieldValue(wagesField), wage_Frequency);
+        double loans = getMultiplier(getTextFieldValue(loansField), loan_Frequency);
+        double otherFinance = getMultiplier(getTextFieldValue(otherField), otherFinance_Frequency);
 
 
         // clear total field and return if any value is NaN (error)
@@ -240,14 +363,14 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     public double calculateSurplus_Deficit() {
 
         // get values from income text fields.  value is NaN if an error occurs
-        double wages = getTextFieldValue(wagesField);
-        double loans = getTextFieldValue(loansField);
-        double otherFinance = getTextFieldValue(otherField);
+        double wages = getMultiplier(getTextFieldValue(wagesField), wage_Frequency);
+        double loans = getMultiplier(getTextFieldValue(loansField), loan_Frequency);
+        double otherFinance = getMultiplier(getTextFieldValue(otherField), otherFinance_Frequency);
 
         //Then get the values of the expenses.
-        double food = getTextFieldValue(FoodExpenseField);
-        double rent = getTextFieldValue(RentExpenseField);
-        double otherExpense = getTextFieldValue(OtherExpenseField);
+        double food = getMultiplier(getTextFieldValue(FoodExpenseField), food_Frequency);
+        double rent = getMultiplier(getTextFieldValue(RentExpenseField), rent_Frequency);
+        double otherExpense = getMultiplier(getTextFieldValue(OtherExpenseField), otherExpenses_Frequency);
 
         // clear total field and return if any value is NaN (error)
         if (Double.isNaN(wages) || Double.isNaN(loans) || Double.isNaN(otherFinance)) {
@@ -286,6 +409,8 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
             }
         }
     }
+
+
 
 
 // below is standard code to set up Swing, which students shouldnt need to edit much
