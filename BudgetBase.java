@@ -18,6 +18,7 @@ import javax.swing.*;
 import javax.swing.text.DefaultEditorKit;
 import java.awt.event.*;
 import java.awt.*;
+import java.util.Stack;
 
 // class definition
 public class BudgetBase extends JPanel {    // based on Swing JPanel
@@ -29,6 +30,8 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     // widgets which may have listeners and/or values
     private JButton calculateButton;   // Calculate button
     private JButton exitButton;        // Exit button
+    private JButton undoButton; //Undo Button
+
     private JTextField wagesField;     // Wages text field
     private JTextField loansField;     // Loans text field
     private JTextField totalIncomeField; // Total Income field
@@ -45,7 +48,9 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     private JComboBox<String> rent_Frequency;
     private JComboBox<String> otherExpenses_Frequency;
 
+
     String[] dropdown_options = new String[]{"week", "month", "year"};
+    Stack<String> history_stack = new Stack<>();
 
 
     // constructor - create UI  (dont need to change this)
@@ -171,7 +176,11 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
         // Row 9 - Exit Button
         exitButton = new JButton("Exit");
-        addComponent(exitButton, 10, 0);
+        addComponent(exitButton, 10, 2);
+
+        // Row 9 - Undo Button
+        undoButton = new JButton("Undo");
+        addComponent(undoButton, 10, 0);
 
         // set up  listeners (in a separate method)
         initListeners();
@@ -180,73 +189,8 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     // set up listeners
     // initially just for buttons, can add listeners for text fields
     private void initListeners() {
-        //For when focus is lost and the fields need updating
-        wagesField.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                //Leaving this field empty as the only uses of this will be when focus is lost
-            }
 
-            @Override
-            public void focusLost(FocusEvent e) {
-                calculateTotalIncome(); calculateSurplus_Deficit();
-            }
-        });
-        loansField.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                //Leaving this field empty as the only uses of this will be when focus is lost
-            }
 
-            @Override
-            public void focusLost(FocusEvent e) {
-                calculateTotalIncome(); calculateSurplus_Deficit();
-            }
-        });
-        otherField.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                //Leaving this field empty as the only uses of this will be when focus is lost
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                calculateTotalIncome(); calculateSurplus_Deficit();
-            }
-        });
-        FoodExpenseField.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                //Leaving this field empty as the only uses of this will be when focus is lost
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                calculateTotalIncome(); calculateSurplus_Deficit();
-            }
-        });
-        RentExpenseField.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                //Leaving this field empty as the only uses of this will be when focus is lost
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                calculateTotalIncome(); calculateSurplus_Deficit();
-            }
-        });
-        OtherExpenseField.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                //Leaving this field empty as the only uses of this will be when focus is lost
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                calculateTotalIncome(); calculateSurplus_Deficit();
-            }
-        });
 
         //For when a number is entered or changed
         allkeys(wagesField);
@@ -255,6 +199,17 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         allkeys(FoodExpenseField);
         allkeys(RentExpenseField);
         allkeys(OtherExpenseField);
+
+        //For when focus is lost for a text field
+        refocus(wagesField);
+        refocus(loansField);
+        refocus(otherField);
+        refocus(FoodExpenseField);
+        refocus(RentExpenseField);
+        refocus(OtherExpenseField);
+
+        //For when the undo button is pressed
+
 
 
 
@@ -267,6 +222,13 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         exitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
+            }
+        });
+
+        //UndoButton
+        undoButton.addActionListener(new java.awt.event.ActionListener(){
+            public void actionPerformed(ActionEvent e) {
+
             }
         });
 
@@ -285,7 +247,9 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
     }
 
+    public class Pair<A,B>{
 
+    }
 
     // add a component at specified row and column in UI.  (0,0) is top-left corner
     private void addComponent(Component component, int gridrow, int gridcol) {
@@ -312,6 +276,49 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
             default -> value;
         };
 
+    }
+    //History of uses and also the implimentation of the undo button
+    public void history( JTextField field){
+        field.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                history_stack.push(field, getTextFieldValue(field));
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                history_stack.push(String.valueOf(field));
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                history_stack.push(String.valueOf(field));
+            }
+        });
+    }
+
+    //Undo Button Implimentation
+    public void setUndoButton(){
+        //First - Check remove the first element
+        history_stack.pop();
+        //Second find the JTEXTFIELD that corresponds to the new one and change it
+        history_stack.substring(0,)
+
+    }
+
+    //Method for all focus listeners
+    public void refocus(JTextField field){
+        field.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                //Leaving this field empty as the only uses of this will be when focus is lost
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome(); calculateSurplus_Deficit();
+            }
+        });
     }
     //Method for all the key listeners
     public void allkeys(JTextField field){
