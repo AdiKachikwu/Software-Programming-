@@ -50,7 +50,8 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
 
     String[] dropdown_options = new String[]{"week", "month", "year"};
-    Stack<String> history_stack = new Stack<>();
+    Stack<stack_Pair> history_stack = new Stack<>();
+
 
 
     // constructor - create UI  (dont need to change this)
@@ -209,6 +210,12 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         refocus(OtherExpenseField);
 
         //For when the undo button is pressed
+        history(wagesField);
+        history(loansField);
+        history(otherField);
+        history(FoodExpenseField);
+        history(RentExpenseField);
+        history(OtherExpenseField);
 
 
 
@@ -219,27 +226,27 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
 
         // exitButton - exit program when pressed
-        exitButton.addActionListener(new java.awt.event.ActionListener() {
+        exitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
         });
 
         //UndoButton
-        undoButton.addActionListener(new java.awt.event.ActionListener(){
+        undoButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e) {
-
+                setUndoButton();
             }
         });
 
         // calculateButton - call calculateTotalIncome() when pressed
-        calculateButton.addActionListener(new java.awt.event.ActionListener() {
+        calculateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 calculateTotalIncome(); calculateSurplus_Deficit();
             }
         });
                 // wagesField - call calculateTotalIncome() when pressed
-        wagesField.addActionListener(new java.awt.event.ActionListener() {
+        wagesField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 calculateTotalIncome();
             }
@@ -247,9 +254,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
     }
 
-    public class Pair<A,B>{
 
-    }
 
     // add a component at specified row and column in UI.  (0,0) is top-left corner
     private void addComponent(Component component, int gridrow, int gridcol) {
@@ -282,28 +287,52 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         field.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                history_stack.push(field, getTextFieldValue(field));
+                //
             }
 
             @Override
             public void keyPressed(KeyEvent e) {
-                history_stack.push(String.valueOf(field));
+                String text_field = field.getText();
+                stack_Pair pair = new stack_Pair((field), text_field);
+                history_stack.push(pair);
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                history_stack.push(String.valueOf(field));
+                //
             }
         });
     }
 
     //Undo Button Implimentation
     public void setUndoButton(){
-        //First - Check remove the first element
-        history_stack.pop();
-        //Second find the JTEXTFIELD that corresponds to the new one and change it
-        history_stack.substring(0,)
+        if (!history_stack.isEmpty()) {
+            stack_Pair previous_entry = history_stack.pop();
+            previous_entry.getField().setText(previous_entry.getTextField());
+        }
+        //A longer version of this which was I was trying to do at first would be Stack_Pair previous_entry = history_stack.peek(); history_stack.pop();previous_entry.getField() etc, took me a bit to understand this though cause my head was stuck in python and I wanted to loop through it, when all vales are being pushed.
 
+
+
+    }
+
+    //To pair up the stack so that I can access them
+    class stack_Pair {
+        private final JTextField field;
+        private final String textField;
+
+        public stack_Pair(JTextField field, String textField){
+            this.field = field;
+            this.textField = textField;
+        }
+
+        public JTextField getField() {
+            return field;
+        }
+
+        public String getTextField (){
+            return textField;
+        }
     }
 
     //Method for all focus listeners
@@ -322,7 +351,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     }
     //Method for all the key listeners
     public void allkeys(JTextField field){
-        field.addKeyListener(new java.awt.event.KeyListener() {
+        field.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
                 calculateTotalIncome(); calculateSurplus_Deficit();
@@ -410,7 +439,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
             //return Double.parseDouble(fieldString);
             try {
                 return Double.parseDouble(fieldString);  // parse field number into a double
-             } catch (java.lang.NumberFormatException ex) {  // catch invalid number exception
+             } catch (NumberFormatException ex) {  // catch invalid number exception
                 JOptionPane.showMessageDialog(topLevelFrame, "Please enter a valid number");  // show error message
                 return Double.NaN;  // return NaN to show that field is not a number
             }
@@ -442,7 +471,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowGUI(); 
             }
