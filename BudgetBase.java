@@ -15,7 +15,6 @@ package Budget;
 
 // Swing imports
 import javax.swing.*;
-import javax.swing.text.DefaultEditorKit;
 import java.awt.event.*;
 import java.awt.*;
 import java.util.Stack;
@@ -32,10 +31,10 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     private JButton exitButton;        // Exit button
     private JButton undoButton; //Undo Button
 
-    private JTextField wagesField;     // Wages text field
-    private JTextField loansField;     // Loans text field
+    private JTextField WagesField;     // Wages text field
+    private JTextField LoansField;     // Loans text field
     private JTextField totalIncomeField; // Total Income field
-    private JTextField otherField; // Other Finance Field
+    private JTextField OtherFinField; // Other Finance Field
     private JTextField FoodExpenseField; //Food Expense Field
     private JTextField RentExpenseField; //Rent Expense Field
     private JTextField OtherExpenseField; //Other Expense Field
@@ -50,7 +49,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
 
     String[] dropdown_options = new String[]{"week", "month", "year"};
-    Stack<stack_Pair> history_stack = new Stack<>();
+    Stack<State_Object> history = new Stack<>();
 
 
 
@@ -76,9 +75,9 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
         // set up text field for entering wages
         // Could create method to do below (since this is done several times)
-        wagesField = new JTextField("", 10);   // blank initially, with 10 columns
-        wagesField.setHorizontalAlignment(JTextField.RIGHT) ;    // number is at right end of field
-        addComponent(wagesField, 1, 1);
+        WagesField = new JTextField("", 10);   // blank initially, with 10 columns
+        WagesField.setHorizontalAlignment(JTextField.RIGHT) ;    // number is at right end of field
+        addComponent(WagesField, 1, 1);
 
         //Set up a frequency for the wages
         wage_Frequency = addDropdown(dropdown_options);
@@ -90,9 +89,9 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         addComponent(loansLabel, 2, 0);
 
         // set up text box for entering loans
-        loansField = new JTextField("", 10);   // blank initially, with 10 columns
-        loansField.setHorizontalAlignment(JTextField.RIGHT) ;    // number is at right end of field
-        addComponent(loansField, 2, 1);
+        LoansField = new JTextField("", 10);   // blank initially, with 10 columns
+        LoansField.setHorizontalAlignment(JTextField.RIGHT) ;    // number is at right end of field
+        addComponent(LoansField, 2, 1);
 
         //Set up a frequency for the loan
         loan_Frequency = addDropdown(dropdown_options);
@@ -104,9 +103,9 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         addComponent(OtherLabel, 3, 0);
 
         //set up textfield for entering other finances
-        otherField = new JTextField("", 10);
-        otherField.setHorizontalAlignment(JTextField.RIGHT);
-        addComponent(otherField, 3, 1);
+        OtherFinField = new JTextField("", 10);
+        OtherFinField.setHorizontalAlignment(JTextField.RIGHT);
+        addComponent(OtherFinField, 3, 1);
 
         //Set up a frequency for the other finance options
         otherFinance_Frequency = addDropdown(dropdown_options);
@@ -194,28 +193,44 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
 
         //For when a number is entered or changed
-        allkeys(wagesField);
-        allkeys(loansField);
-        allkeys(otherField);
+        allkeys(WagesField);
+        allkeys(LoansField);
+        allkeys(OtherFinField);
         allkeys(FoodExpenseField);
         allkeys(RentExpenseField);
         allkeys(OtherExpenseField);
 
         //For when focus is lost for a text field
-        refocus(wagesField);
-        refocus(loansField);
-        refocus(otherField);
+        refocus(WagesField);
+        refocus(LoansField);
+        refocus(OtherFinField);
         refocus(FoodExpenseField);
         refocus(RentExpenseField);
         refocus(OtherExpenseField);
 
         //For when the undo button is pressed
-        history(wagesField);
-        history(loansField);
-        history(otherField);
+        //For the zero value
+        State_Object history_State = new State_Object();
+        history.push(history_method(history_State));
+
+        //The history of these text fields
+        history(WagesField);
+        history(LoansField);
+        history(OtherFinField);
         history(FoodExpenseField);
         history(RentExpenseField);
         history(OtherExpenseField);
+
+        //The history of frequency
+        history_Frequency(wage_Frequency);
+        history_Frequency(loan_Frequency);
+        history_Frequency(otherFinance_Frequency);
+        history_Frequency(food_Frequency);
+        history_Frequency(rent_Frequency);
+        history_Frequency(otherExpenses_Frequency);
+
+
+
 
 
 
@@ -226,27 +241,29 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
 
         // exitButton - exit program when pressed
-        exitButton.addActionListener(new ActionListener() {
+        exitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
         });
 
         //UndoButton
-        undoButton.addActionListener(new ActionListener(){
+        undoButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 setUndoButton();
             }
         });
 
         // calculateButton - call calculateTotalIncome() when pressed
-        calculateButton.addActionListener(new ActionListener() {
+        calculateButton.addActionListener(new java.awt.event.ActionListener()  {
             public void actionPerformed(ActionEvent e) {
                 calculateTotalIncome(); calculateSurplus_Deficit();
+                State_Object history_State = new State_Object();
+                history.push(history_method(history_State));
             }
         });
-                // wagesField - call calculateTotalIncome() when pressed
-        wagesField.addActionListener(new ActionListener() {
+                // WagesField - call calculateTotalIncome() when pressed
+        WagesField.addActionListener(new java.awt.event.ActionListener()  {
             public void actionPerformed(ActionEvent e) {
                 calculateTotalIncome();
             }
@@ -282,33 +299,105 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         };
 
     }
-    //History of uses and also the implimentation of the undo button
+    //General method for saving to the the stack
+    public State_Object history_method(State_Object history_State){
+        history_State.Wage_save = String.valueOf(getTextFieldValue(WagesField));
+        history_State.Loan_save = String.valueOf(getTextFieldValue(LoansField));
+        history_State.OtherFin_save = String.valueOf(getTextFieldValue(OtherFinField));
+        history_State.Food_save = String.valueOf(getTextFieldValue(FoodExpenseField));
+        history_State.Rent_save = String.valueOf(getTextFieldValue(RentExpenseField));
+        history_State.OtherExpense_save = String.valueOf(getTextFieldValue(OtherExpenseField));
+
+        history_State.wageFrequency_save = wage_Frequency.getSelectedItem();
+        history_State.loanFrequency_save = loan_Frequency.getSelectedItem();
+        history_State.otherFin_Frequency = otherFinance_Frequency.getSelectedItem();
+        history_State.Food_Frequency_save = food_Frequency.getSelectedItem();
+        history_State.Rent_Frequency_save = rent_Frequency.getSelectedItem();
+        history_State.Other_Expense_Frequency_save = otherExpenses_Frequency.getSelectedItem();
+        return history_State;
+    }
+
+    //History of uses for JTextfields
     public void history( JTextField field){
-        field.addKeyListener(new KeyListener() {
+        field.addFocusListener(new java.awt.event.FocusListener(){
+
             @Override
-            public void keyTyped(KeyEvent e) {
-                //
+            public void focusGained(FocusEvent e) {
+
             }
 
             @Override
-            public void keyPressed(KeyEvent e) {
-                String text_field = field.getText();
-                stack_Pair pair = new stack_Pair((field), text_field);
-                history_stack.push(pair);
+            public void focusLost(FocusEvent e) {
+                State_Object history_State = new State_Object();
+                history.push(history_method(history_State));
             }
+        });
+
+        field.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                State_Object history_State = new State_Object();
+                history.push(history_method(history_State));
+            }
+        });
+
+    }
+
+    // History of Dropdown Method
+    public void history_Frequency(JComboBox<String> combo_box){
+        combo_box.addActionListener(new java.awt.event.ActionListener(){
 
             @Override
-            public void keyReleased(KeyEvent e) {
-                //
+            public void actionPerformed(ActionEvent e) {
+                State_Object history_State = new State_Object();
+                history.push(history_method(history_State));
             }
         });
     }
 
+
+
+
+
+    public class State_Object {
+
+        String Wage_save;
+        String Loan_save;
+        String OtherFin_save;
+
+
+        String Food_save;
+        String Rent_save;
+        String OtherExpense_save;
+
+
+        Object wageFrequency_save;
+        Object loanFrequency_save;
+        Object otherFin_Frequency;
+        Object Food_Frequency_save;
+        Object Rent_Frequency_save;
+        Object Other_Expense_Frequency_save;
+
+
+    }
+
     //Undo Button Implimentation
     public void setUndoButton(){
-        if (!history_stack.isEmpty()) {
-            stack_Pair previous_entry = history_stack.pop();
-            previous_entry.getField().setText(previous_entry.getTextField());
+        if (!history.isEmpty()) {
+            State_Object previous_entry = history.pop();
+            WagesField.setText(previous_entry.Wage_save);
+            LoansField.setText(previous_entry.Loan_save);
+            OtherFinField.setText(previous_entry.OtherFin_save);
+            FoodExpenseField.setText(previous_entry.Food_save);
+            RentExpenseField.setText(previous_entry.Rent_save);
+            OtherExpenseField.setText(previous_entry.OtherExpense_save);
+
+            wage_Frequency.setSelectedItem(previous_entry.wageFrequency_save);
+            loan_Frequency.setSelectedItem(previous_entry.loanFrequency_save);
+            otherFinance_Frequency.setSelectedItem(previous_entry.otherFin_Frequency);
+            food_Frequency.setSelectedItem(previous_entry.Food_Frequency_save);
+            rent_Frequency.setSelectedItem(previous_entry.Rent_Frequency_save);
+            otherExpenses_Frequency.setSelectedItem(previous_entry.Other_Expense_Frequency_save);
         }
         //A longer version of this which was I was trying to do at first would be Stack_Pair previous_entry = history_stack.peek(); history_stack.pop();previous_entry.getField() etc, took me a bit to understand this though cause my head was stuck in python and I wanted to loop through it, when all vales are being pushed.
 
@@ -316,28 +405,10 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
 
     }
 
-    //To pair up the stack so that I can access them
-    class stack_Pair {
-        private final JTextField field;
-        private final String textField;
-
-        public stack_Pair(JTextField field, String textField){
-            this.field = field;
-            this.textField = textField;
-        }
-
-        public JTextField getField() {
-            return field;
-        }
-
-        public String getTextField (){
-            return textField;
-        }
-    }
 
     //Method for all focus listeners
     public void refocus(JTextField field){
-        field.addFocusListener(new FocusListener() {
+        field.addFocusListener(new java.awt.event.FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
                 //Leaving this field empty as the only uses of this will be when focus is lost
@@ -351,7 +422,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     }
     //Method for all the key listeners
     public void allkeys(JTextField field){
-        field.addKeyListener(new KeyListener() {
+        field.addKeyListener(new java.awt.event.KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
                 calculateTotalIncome(); calculateSurplus_Deficit();
@@ -376,9 +447,9 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     public double calculateTotalIncome() {
 
         // get values from income text fields.  value is NaN if an error occurs
-        double wages = getMultiplier(getTextFieldValue(wagesField), wage_Frequency);
-        double loans = getMultiplier(getTextFieldValue(loansField), loan_Frequency);
-        double otherFinance = getMultiplier(getTextFieldValue(otherField), otherFinance_Frequency);
+        double wages = getMultiplier(getTextFieldValue(WagesField), wage_Frequency);
+        double loans = getMultiplier(getTextFieldValue(LoansField), loan_Frequency);
+        double otherFinance = getMultiplier(getTextFieldValue(OtherFinField), otherFinance_Frequency);
 
 
         // clear total field and return if any value is NaN (error)
@@ -399,9 +470,9 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     public double calculateSurplus_Deficit() {
 
         // get values from income text fields.  value is NaN if an error occurs
-        double wages = getMultiplier(getTextFieldValue(wagesField), wage_Frequency);
-        double loans = getMultiplier(getTextFieldValue(loansField), loan_Frequency);
-        double otherFinance = getMultiplier(getTextFieldValue(otherField), otherFinance_Frequency);
+        double wages = getMultiplier(getTextFieldValue(WagesField), wage_Frequency);
+        double loans = getMultiplier(getTextFieldValue(LoansField), loan_Frequency);
+        double otherFinance = getMultiplier(getTextFieldValue(OtherFinField), otherFinance_Frequency);
 
         //Then get the values of the expenses.
         double food = getMultiplier(getTextFieldValue(FoodExpenseField), food_Frequency);
